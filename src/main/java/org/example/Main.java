@@ -3,17 +3,26 @@ package org.example;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.testng.Assert;
+import org.testng.ITestResult;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import java.util.concurrent.TimeUnit;
+
+import static org.openqa.selenium.devtools.v85.page.Page.captureScreenshot;
 
 public class Main {
     private WebDriver driver;
 
 
     @BeforeClass
+//    @Parameters
     public void setup() {
         // Set the path to the Firefox driver executable if it's not in your system PATH
         System.setProperty("webdriver.gecko.driver", "C:\\Users\\Rashad\\IdeaProjects\\untitled5\\geckodriver.exe");
@@ -25,11 +34,17 @@ public class Main {
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
     }
 
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void signUp() {
         driver.get("https://parabank.parasoft.com/parabank/admin.htm");
         WebElement callRegister = driver.findElement(By.cssSelector("#loginPanel > p:nth-child(3) > a:nth-child(1)"));
         callRegister.click();
+
+        Assert.assertTrue(driver.getCurrentUrl().contains("/parabank/register.htm"), "Registration link not clicked successfully");
+
+        // Assertion 2: Check if the registration form is displayed
+        Assert.assertTrue(driver.findElement(By.cssSelector(".title")).getText().contains("Signing up is easy!"), "Registration form not displayed");
+
         WebElement firstName = driver.findElement(By.cssSelector("#customer\\.firstName"));
         firstName.sendKeys("Rashad");
         WebElement lastName = driver.findElement(By.cssSelector("#customer\\.lastName"));
@@ -55,16 +70,30 @@ public class Main {
         WebElement registerButton = driver.findElement(By.cssSelector(".form2 > tbody:nth-child(1) > tr:nth-child(13) > td:nth-child(2) > input:nth-child(1)"));
         registerButton.click();
 
+
+
+        // ... existing code ...
+
+        // Assertion 3: Check if registration is successful (you might need to adjust the selector based on the actual success message)
+        WebElement successMessage = driver.findElement(By.cssSelector(".title"));
+        Assert.assertTrue(successMessage.getText().contains("Thank you for registering"), "Registration not successful");
     }
 
     @Test (enabled = true)
     public void logIn(){
         loginProcess();
+        // Assertion 2: Check if the welcome message is displayed (you might need to adjust the selector)
+        WebElement welcomeMessage = driver.findElement(By.cssSelector("#leftPanel p small b"));
+        Assert.assertTrue(welcomeMessage.getText().contains("admin"), "Welcome message not displayed");
 
     }
     @Test
     public void payBill() {
         loginProcess();
+        // Assertion 1: Check if the bill payment page is displayed (you might need to adjust the selector)
+        WebElement billPaymentHeader = driver.findElement(By.cssSelector("#rightPanel > h1"));
+        Assert.assertTrue(billPaymentHeader.getText().contains("Bill Payment"), "Bill payment page not displayed");
+
         WebElement billPay = driver.findElement(By.cssSelector("#leftPanel > ul:nth-child(3) > li:nth-child(4) > a:nth-child(1)"));
         billPay.click();
         WebElement payeeName = driver.findElement(By.xpath("/html/body/div[1]/div[3]/div[2]/div/div[1]/form/table/tbody/tr[1]/td[2]/input"));
@@ -85,9 +114,18 @@ public class Main {
         verifyAccount.sendKeys("azimov");
         WebElement amount = driver.findElement(By.cssSelector(".form2 > tbody:nth-child(1) > tr:nth-child(11) > td:nth-child(2) > input:nth-child(1)"));
         amount.sendKeys("1000");
+
+        // Assertion 2: Check if the payment confirmation message is displayed (you might need to adjust the selector)
+        WebElement confirmationMessage = driver.findElement(By.cssSelector(".ng-scope > p:nth-child(2) > b:nth-child(1)"));
+        Assert.assertTrue(confirmationMessage.getText().contains("successfully submitted"), "Bill payment not successful");
+
         driver.manage().timeouts().implicitlyWait(2000,TimeUnit.MILLISECONDS);
         driver.quit();
     }
+
+
+
+
     public void loginProcess(){
         driver.get("https://parabank.parasoft.com/parabank/admin.htm");
         WebElement username = driver.findElement(By.cssSelector("div.login:nth-child(2) > input:nth-child(1)"));
@@ -96,6 +134,7 @@ public class Main {
         password.sendKeys("12345678");
         WebElement loginButton = driver.findElement(By.cssSelector("div.login:nth-child(5) > input:nth-child(1)"));
         loginButton.click();
+
 
     }
 }
