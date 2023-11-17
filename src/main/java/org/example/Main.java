@@ -13,6 +13,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 
 import static org.openqa.selenium.devtools.v85.page.Page.captureScreenshot;
@@ -83,9 +84,18 @@ public class Main {
     public void logIn(){
         loginProcess();
         // Assertion 2: Check if the welcome message is displayed (you might need to adjust the selector)
-        WebElement welcomeMessage = driver.findElement(By.cssSelector("#leftPanel p small b"));
-        Assert.assertTrue(welcomeMessage.getText().contains("admin"), "Welcome message not displayed");
+        try {
+            WebElement welcomeMessage = driver.findElement(By.cssSelector("#leftPanel p small b"));
+            Assert.assertTrue(welcomeMessage.getText().contains("admin"), "Welcome message does not contain 'admin'. Test failed.");
+        } catch (NoSuchElementException e) {
+            String errorMessage = "Welcome message element not found. Test failed. Exception: " + e.getMessage();
+            System.out.println(errorMessage);
+            Assert.fail(errorMessage);
+        }
 
+
+
+        driver.quit();
     }
     @Test
     public void payBill() {
@@ -136,5 +146,32 @@ public class Main {
         loginButton.click();
 
 
+    }
+    @Test
+    public void forgotPassword(){
+        driver.get("https://parabank.parasoft.com/parabank/admin.htm");
+        WebElement forgotButton = driver.findElement(By.cssSelector("#loginPanel > p:nth-child(2) > a:nth-child(1)"));
+        forgotButton.click();
+        WebElement firstName = driver.findElement(By.cssSelector("#firstName"));
+        firstName.sendKeys("Rashad");
+        WebElement lastName = driver.findElement(By.cssSelector("#lastName"));
+        lastName.sendKeys("Azimov");
+        WebElement address = driver.findElement(By.cssSelector("#address\\.street"));
+        address.sendKeys("Magomaev");
+        WebElement city = driver.findElement(By.cssSelector("#address\\.city"));
+        city.sendKeys("Baku");
+        WebElement state = driver.findElement(By.cssSelector("#address\\.state"));
+        state.sendKeys("null");
+        WebElement zipCode = driver.findElement(By.cssSelector("#address\\.zipCode"));
+        zipCode.sendKeys("12345");
+        WebElement ssnNumber = driver.findElement(By.cssSelector("#ssn"));
+        ssnNumber.sendKeys("112233");
+        WebElement submitButton = driver.findElement(By.cssSelector(".form2 > tbody:nth-child(1) > tr:nth-child(8) > td:nth-child(2) > input:nth-child(1)"));
+        submitButton.click();
+        WebElement successMessage = driver.findElement(By.cssSelector(".error"));
+        String expectedMessage = "Password reset successfully";
+        String actualMessage = successMessage.getText();
+        Assert.assertEquals(actualMessage, expectedMessage);
+        driver.quit();
     }
 }
